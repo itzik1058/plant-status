@@ -22,11 +22,17 @@ subscriptions = mongo_client['telegram']['subscriptions']
 
 async def list_devices(update: Update, context: ContextTypes.DEFAULT_TYPE):
     devices = firebase_db.reference().get(shallow=True).keys()
-    await update.message.reply_text(', '.join(devices))
+    if not devices:
+        await update.message.reply_text('No devices are available for subscription.')
+    else:
+        await update.message.reply_text(', '.join(devices))
 
 async def list_subscriptions(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    devices = [subscription['device'] for subscription in subscriptions.find() if subscriptions['user_id'] == update.message.chat_id]
-    await update.message.reply_text(', '.join(devices))
+    devices = [subscription['device'] for subscription in subscriptions.find() if subscription['user_id'] == update.message.chat_id]
+    if not devices:
+        await update.message.reply_text('You are not subscribed to any devices.')
+    else:
+        await update.message.reply_text(', '.join(devices))
 
 async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if len(context.args) < 1:
