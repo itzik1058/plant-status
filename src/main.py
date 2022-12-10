@@ -21,7 +21,6 @@ mongo_client = MongoClient(f"mongodb+srv://{config('MONGODB_USER')}:{config('MON
 subscriptions = mongo_client['telegram']['subscriptions']
 
 async def list_devices(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # devices = firebase_db.reference(update.message.chat_id).get(shallow=True).keys()
     devices = firebase_db.reference().get(shallow=True).keys()
     await update.message.reply_text(', '.join(devices))
 
@@ -34,7 +33,6 @@ async def subscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text('Select a device to subscribe.')
         return
     device = context.args[0]
-    # user_devices = firebase_db.reference(update.message.chat_id).get(shallow=True).keys()
     user_devices = firebase_db.reference().get(shallow=True).keys()
     if device not in user_devices:
         await update.message.reply_text('This device does not exist.')
@@ -61,7 +59,6 @@ async def unsubscribe(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status_update(context: ContextTypes.DEFAULT_TYPE):
     for subscription in subscriptions.find():
         user_id, device, user_timestamp = subscription['user_id'], subscription['device'], subscription['timestamp']
-        # _, last_update = firebase_db.reference(f'{user_id}/{device}').order_by_key().limit_to_last(1).get().popitem()
         _, last_update = firebase_db.reference(f'{device}').order_by_key().limit_to_last(1).get().popitem()
         timestamp, moisture = last_update['timestamp'], last_update['moisture']
         if timestamp > user_timestamp:
